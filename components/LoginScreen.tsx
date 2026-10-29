@@ -50,10 +50,11 @@ export default function LoginScreen() {
         {/* The photo: public/login-photo.jpg. If it's missing, the plain carbon-blue panel shows instead. */}
         {photoOk && (
           // eslint-disable-next-line @next/next/no-img-element -- a decorative background photo
-          <img src="/login-photo.jpg" alt="" onError={() => setPhotoOk(false)} className="absolute inset-0 h-full w-full scale-105 object-cover blur-[3px]" />
+          <img src="/login-photo.jpg" alt="" onError={() => setPhotoOk(false)} className="absolute inset-0 h-full w-full object-cover" />
         )}
-        {/* A slight blur and a carbon-blue fade keep the white text readable on any photo, and small print in it unreadable */}
-        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[#0f1f4d] via-[#0f1f4d]/80 to-[#0f1f4d]/40" />
+        {/* Dark fades at the top and bottom keep the logo and the white text readable on the photo */}
+        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/55 via-45% to-black/0" />
+        <div aria-hidden="true" className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black/60 to-transparent" />
         <p className="relative flex items-center gap-2 text-2xl font-bold">
           <Logo className="h-9 w-9" />
           PaperTrail

@@ -51,8 +51,15 @@ The look comes from the carbon-copy duplicate books used at shop counters: a pal
 typewriter font, and rubber stamps for the status. Dark mode is the same book under a desk lamp at night.
 The quote or invoice itself is always white paper with one carbon-blue line, because that's what the client gets.
 
-The sign-in screen shows a photo (`public/login-photo.jpg`, free to use from Unsplash or Pexels) with a
-carbon-blue fade, so the white heading stays readable. If the photo is missing, the plain blue panel shows instead.
+The sign-in screen shows a photo (`public/login-photo.jpg`, free to use from Unsplash or Pexels) with dark
+fades at the top and bottom, so the logo and the white heading stay readable. If the photo is missing, the plain
+blue panel shows instead.
+
+The first screen after signing up shows three real PaperTrail documents with made-up details, overlapping like
+pages on a desk (`components/SampleDocuments.tsx`). Each shows something the app does: a quote the client
+accepted, the tax invoice made from it with a part payment, and an invoice in Afrikaans that's been paid.
+They use the same `DocumentSheet` as the app, so new users see exactly what they're about to make. Phones skip
+them so the buttons stay near the top.
 
 Fonts: [Familjen Grotesk](https://fonts.google.com/specimen/Familjen+Grotesk) for everything, and
 [Courier Prime](https://fonts.google.com/specimen/Courier+Prime) only for the slip numbers.

@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import NewDocumentButtons from "@/components/NewDocumentButtons";
+import SampleDocuments from "@/components/SampleDocuments";
 import { useT } from "@/components/LangProvider";
 
-/* The first visit: an empty duplicate book, and what to do first */
+/* The first visit: what to do first, next to samples of what you'll make */
 export default function FirstRun({ noBusiness }: { noBusiness: boolean }) {
   const t = useT();
   return (
@@ -24,23 +25,14 @@ export default function FirstRun({ noBusiness }: { noBusiness: boolean }) {
           <NewDocumentButtons />
         </div>
       </div>
-      <div aria-hidden="true" className="relative mx-auto h-72 w-full max-w-sm">
-        <div className="perforated absolute left-16 right-0 top-0 h-60 rotate-[8deg] rounded-b-lg border-x border-b border-quote-edge bg-quote" />
-        <div className="perforated absolute left-0 right-14 top-4 h-60 -rotate-[6deg] rounded-b-lg border-x border-b border-invoice-edge bg-invoice" />
-        <div className="perforated absolute inset-x-6 top-12 h-60 rounded-b-lg bg-paper p-6 shadow-[0_12px_32px_-12px_rgba(30,58,138,0.3)]">
-          <div className="flex justify-between">
-            <span className="h-3 w-24 rounded bg-[#dbe4f7]" />
-            <span className="font-type text-lg font-bold text-[#b4122b]">No. 0001</span>
-          </div>
-          <div className="mt-8 space-y-3">
-            <span className="block h-2.5 w-full rounded bg-[#eef2f9]" />
-            <span className="block h-2.5 w-5/6 rounded bg-[#eef2f9]" />
-            <span className="block h-2.5 w-2/3 rounded bg-[#eef2f9]" />
-          </div>
-          <div className="mt-10 flex justify-end">
-            <span className="h-4 w-28 rounded bg-[#dbe4f7]" />
-          </div>
+      {/* Three real documents from the app (made-up details), overlapping, so a new user sees what they can make.
+          Decorative: screen readers skip it, and phones skip it to keep the buttons near the top. */}
+      <div aria-hidden="true" className="pointer-events-none relative mx-auto hidden h-[440px] w-full max-w-[560px] select-none overflow-hidden sm:block">
+        <div className="absolute inset-4">
+          <SampleDocuments />
         </div>
+        {/* The pages fade into the background at the bottom, in light and dark */}
+        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-page to-transparent" />
       </div>
     </div>
   );
