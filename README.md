@@ -2,7 +2,7 @@
 
 **Quotes and invoices for South African small businesses.**
 
-**Live site:** _add your Vercel link here after the first deploy_
+**Live site:** https://papertrail-ten-sable.vercel.app
 
 PaperTrail lets a plumber, electrician, freelancer or any small business make a professional quote or invoice
 in a couple of minutes. Add the work: it works out the 15% VAT, numbers the document, tracks deposits and part
@@ -113,8 +113,10 @@ production build with `npm run build`.
 
 ### 3. Deploy to Vercel
 1. Import the GitHub repo into Vercel.
-2. Add the four environment variables (same names as in `.env.example`).
-3. Deploy. Then in Firebase, **Authentication → Settings → Authorized domains → Add domain** and add your
+2. Add the four environment variables (same names as in `.env.example`) under
+   Settings → Environment Variables.
+3. Deploy. If you add or change a variable later, **redeploy** (Deployments → ⋯ → Redeploy): Next.js
+   builds these settings into the site, so the old build won't see them. Then in Firebase, **Authentication → Settings → Authorized domains → Add domain** and add your
    `….vercel.app` address, so Google sign-in works there too.
 
 ## Environment variables

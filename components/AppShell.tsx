@@ -72,8 +72,8 @@ function SetupNeeded() {
     <div className="mx-auto max-w-xl px-6 py-20">
       <h1 className="text-3xl font-bold">PaperTrail needs its Firebase settings</h1>
       <p className="mt-4 text-lg text-ink-soft">
-        Add the four NEXT_PUBLIC_FIREBASE_ settings to .env.local (on your computer) or to Vercel&apos;s Environment Variables, then
-        restart. The README explains where to find them.
+        Add the four NEXT_PUBLIC_FIREBASE_ settings to .env.local on your computer and restart npm run dev, or to Vercel&apos;s
+        Environment Variables and redeploy. The README explains where to find them.
       </p>
     </div>
   );
