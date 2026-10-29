@@ -1,0 +1,42 @@
+rules_version = '2';
+
+// PaperTrail's database rules. Paste them into Firebase: Firestore Database → Rules → Publish.
+// Each signed-in person can read and write only their own data, under users/{their user id}.
+// Anything else in the database is closed to everyone.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // Business details and numbering
+    match /users/{userId} {
+      allow read, delete: if isOwner(userId);
+      allow create, update: if isOwner(userId)
+        && request.resource.data.keys().hasOnly(['version', 'business', 'counters'])
+        && request.resource.data.business is map
+        && request.resource.data.counters is map;
+
+      // One quote or invoice each
+      match /documents/{docId} {
+        allow read, delete: if isOwner(userId);
+        allow create, update: if isOwner(userId)
+          && request.resource.data.id == docId
+          && request.resource.data.type in ['quote', 'invoice']
+          && request.resource.data.number is string
+          && request.resource.data.number.size() <= 30
+          && request.resource.data.items is list
+          && request.resource.data.items.size() <= 200
+          && request.resource.data.payments is list
+          && request.resource.data.payments.size() <= 200;
+      }
+    }
+
+    // Everything else: closed
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
