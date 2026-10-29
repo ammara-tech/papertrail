@@ -13,8 +13,12 @@ import type { Key } from "@/lib/i18n";
   Firebase checks the password and limits repeated wrong guesses; this screen only
   shows the result in plain words. "Forgot your password?" sends Firebase's reset email.
 */
+/* Who took the photo, e.g. "Photo: Thabo Mokoena on Unsplash". Leave empty to hide the line. */
+const PHOTO_CREDIT = "";
+
 export default function LoginScreen() {
   const t = useT();
+  const [photoOk, setPhotoOk] = useState(true);
   const [mode, setMode] = useState<"signIn" | "signUp">("signIn");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -42,24 +46,21 @@ export default function LoginScreen() {
 
   return (
     <div className="grid min-h-screen lg:grid-cols-[1.05fr_1fr]">
-      <aside className="relative hidden overflow-hidden bg-carbon p-12 text-on-carbon lg:flex lg:flex-col">
-        <p className="flex items-center gap-2 text-2xl font-bold">
+      <aside className="relative hidden overflow-hidden bg-[#1e3a8a] p-12 text-white lg:flex lg:flex-col">
+        {/* The photo: public/login-photo.jpg. If it's missing, the plain carbon-blue panel shows instead. */}
+        {photoOk && (
+          // eslint-disable-next-line @next/next/no-img-element -- a decorative background photo
+          <img src="/login-photo.jpg" alt="" onError={() => setPhotoOk(false)} className="absolute inset-0 h-full w-full scale-105 object-cover blur-[3px]" />
+        )}
+        {/* A slight blur and a carbon-blue fade keep the white text readable on any photo, and small print in it unreadable */}
+        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[#0f1f4d] via-[#0f1f4d]/80 to-[#0f1f4d]/40" />
+        <p className="relative flex items-center gap-2 text-2xl font-bold">
           <Logo className="h-9 w-9" />
           PaperTrail
         </p>
-        <h1 className="mt-auto max-w-md text-5xl font-bold leading-[1.05] tracking-tight">{t("login.tagline")}</h1>
-        <p className="mt-5 max-w-md text-lg opacity-85">{t("login.pitch")}</p>
-        {/* The duplicate book, fanned out */}
-        <div aria-hidden="true" className="pointer-events-none absolute right-10 top-24 h-72 w-60 xl:right-16">
-          <div className="perforated absolute inset-0 rotate-[14deg] rounded-b-lg bg-quote" />
-          <div className="perforated absolute inset-0 rotate-[5deg] rounded-b-lg bg-invoice" />
-          <div className="perforated absolute inset-0 -rotate-[4deg] rounded-b-lg bg-white p-6">
-            <p className="text-right font-type text-xl font-bold text-number">No. 0001</p>
-            <span className="mt-8 block h-2.5 w-4/5 rounded bg-[#e3e9f6]" />
-            <span className="mt-3 block h-2.5 w-3/5 rounded bg-[#e3e9f6]" />
-            <span className="stamp mt-10 inline-block text-lg text-paid">{t("stamp.paid")}</span>
-          </div>
-        </div>
+        <h1 className="relative mt-auto max-w-md text-5xl font-bold leading-[1.05] tracking-tight">{t("login.tagline")}</h1>
+        <p className="relative mt-5 max-w-md text-lg text-white/85">{t("login.pitch")}</p>
+        {PHOTO_CREDIT && <p className="relative mt-8 text-xs text-white/60">{PHOTO_CREDIT}</p>}
       </aside>
 
       <section className="flex flex-col px-5 py-6 sm:px-10">
