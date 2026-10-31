@@ -38,8 +38,21 @@ function Gate({ children }: { children: React.ReactNode }) {
   }, [uid]);
 
   if (!firebaseConfigured) return <SetupNeeded />;
-  if (auth.status === "loading") return <Splash text={t("app.opening")} />;
-  if (auth.status === "signedOut") return <LoginScreen />;
+  // Until Firebase has checked, both screens are on the page and the saved hint picks one
+  // (see lib/auth.ts). The sign-in screen stays in the same place, so nothing typed is lost.
+  if (auth.status !== "signedIn")
+    return (
+      <>
+        {auth.status === "loading" && (
+          <div className="gate-splash">
+            <Splash text={t("app.opening")} />
+          </div>
+        )}
+        <div className={auth.status === "loading" ? "gate-login" : undefined}>
+          <LoginScreen />
+        </div>
+      </>
+    );
   if (!data) return <Splash text={t("app.loadingData")} />;
 
   return (

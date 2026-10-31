@@ -63,7 +63,7 @@ export default function LoginScreen() {
         <p className="relative mt-5 max-w-md text-lg text-white/85">{t("login.pitch")}</p>
       </aside>
 
-      <section className="flex flex-col px-5 py-6 sm:px-10">
+      <main className="flex flex-col px-5 py-6 sm:px-10">
         <div className="flex items-center justify-between">
           <p className="flex items-center gap-2 text-xl font-bold text-carbon lg:invisible">
             <Logo />
@@ -163,7 +163,7 @@ export default function LoginScreen() {
           </p>
           <p className="mt-6 text-sm text-ink-soft">{t("login.privacy")}</p>
         </div>
-      </section>
+      </main>
     </div>
   );
 }
@@ -259,7 +259,7 @@ function DemoDocs() {
           {t("login.demo.reminder", { name: "Lerato", n: "INV-0042", amount: formatRand(TOTAL - PAID), date: formatDate("2026-11-28", lang) })}
           <p className="mt-1.5 flex items-center justify-between gap-2">
             <span className="rounded bg-white/80 px-1.5 py-0.5 font-mono text-[10px] text-[#b42318]">INV-0042.pdf</span>
-            <span className="text-[10px] text-[#53bdeb]">09:14 ✓✓</span>
+            <span className="text-[10px] text-[#0b6b9e]">09:14 ✓✓</span>
           </p>
         </div>
       </div>

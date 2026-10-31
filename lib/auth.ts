@@ -27,9 +27,30 @@ export function useAuth(): AuthState {
   const [state, setState] = useState<AuthState>({ status: firebaseConfigured ? "loading" : "signedOut" });
   useEffect(() => {
     if (!firebaseConfigured) return;
-    return onAuthStateChanged(firebase().auth, (user) => setState(user ? { status: "signedIn", user } : { status: "signedOut" }));
+    return onAuthStateChanged(firebase().auth, (user) => {
+      rememberSignedIn(Boolean(user));
+      setState(user ? { status: "signedIn", user } : { status: "signedOut" });
+    });
   }, []);
   return state;
+}
+
+/*
+  A note on this device saying "someone was signed in here". The page reads it before it's drawn
+  (app/layout.tsx), so a returning user sees the loading screen while Firebase checks, and a new
+  visitor sees the sign-in screen straight away instead of waiting for Firebase to load. It's only
+  a hint for what to show first: Firebase still decides who is signed in.
+*/
+const SIGNED_IN_KEY = "papertrail:signedIn";
+function rememberSignedIn(yes: boolean) {
+  try {
+    if (yes) localStorage.setItem(SIGNED_IN_KEY, "1");
+    else localStorage.removeItem(SIGNED_IN_KEY);
+  } catch {
+    /* storage blocked: the hint just isn't saved */
+  }
+  if (yes) document.documentElement.dataset.signedIn = "1";
+  else delete document.documentElement.dataset.signedIn;
 }
 
 export const signInEmail = (email: string, password: string) => signInWithEmailAndPassword(firebase().auth, email.trim(), password);
