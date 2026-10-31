@@ -35,7 +35,7 @@ with your documents on every device you sign in on.
 
 **Everywhere**
 - **Sign in** with email and password or Google, with **Forgot your password?**. If the browser blocks Google's pop-up window, the whole page goes to Google instead. Sign-in errors say what went wrong in plain words, with Firebase's error code underneath.
-- **Fast first load:** a new visitor gets the sign-in screen straight from the server, without waiting for Firebase to load. Someone who has signed in on the device before sees the loading screen instead while Firebase checks (a small hint saved on the device decides which).
+- **Fast first load:** a new visitor gets the sign-in screen straight from the server, without waiting for Firebase to load. Someone who has signed in on the device before sees the loading screen instead while Firebase checks (a small hint saved on the device decides which). Google's sign-in helper only loads when someone presses **Continue with Google**, not on every visit.
 - **Cloud sync**: documents are saved to your account, so they're on your phone and laptop. It also works
   offline and syncs when you're back online. The header shows if everything is saved.
 - **English or Afrikaans** for the app (the EN/AF button), and a separate setting for the language

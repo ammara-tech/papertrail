@@ -1,5 +1,5 @@
 import { getApps, initializeApp, type FirebaseApp } from "firebase/app";
-import { getAuth, type Auth } from "firebase/auth";
+import { browserLocalPersistence, browserSessionPersistence, indexedDBLocalPersistence, initializeAuth, type Auth } from "firebase/auth";
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, type Firestore } from "firebase/firestore";
 
 /*
@@ -31,7 +31,9 @@ export function firebase() {
     const app = getApps()[0] ?? initializeApp(config);
     services = {
       app,
-      auth: getAuth(app),
+      // Like getAuth, but without loading Google's sign-in window helper (about 90 KB) on every
+      // visit: lib/auth.ts hands it over only when someone presses "Continue with Google".
+      auth: initializeAuth(app, { persistence: [indexedDBLocalPersistence, browserLocalPersistence, browserSessionPersistence] }),
       db: initializeFirestore(app, {
         ignoreUndefinedProperties: true, // optional fields like "fromQuote" can be missing
         localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),

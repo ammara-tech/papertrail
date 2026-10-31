@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   GoogleAuthProvider,
+  browserPopupRedirectResolver,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   sendPasswordResetEmail,
@@ -64,17 +65,35 @@ export async function signInGoogle() {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" }); // always let people choose which Google account
   try {
-    return await signInWithPopup(firebase().auth, provider);
+    return await signInWithPopup(firebase().auth, provider, browserPopupRedirectResolver);
   } catch (error) {
     if (["auth/popup-blocked", "auth/operation-not-supported-in-this-environment"].includes(errorCode(error))) {
-      return signInWithRedirect(firebase().auth, provider);
+      try {
+        sessionStorage.setItem(REDIRECT_KEY, "1"); // so the page knows to finish it when it comes back
+      } catch {
+        /* storage blocked */
+      }
+      return signInWithRedirect(firebase().auth, provider, browserPopupRedirectResolver);
     }
     throw error;
   }
 }
 
-/** After coming back from a full-page Google sign-in, any error shows up here. */
-export const finishRedirectSignIn = () => getRedirectResult(firebase().auth);
+/**
+ * After coming back from a full-page Google sign-in, this finishes it (any error shows up here).
+ * It only runs when a full-page sign-in was started, so normal visits don't load Google's helper.
+ */
+export async function finishRedirectSignIn() {
+  let started = false;
+  try {
+    started = sessionStorage.getItem(REDIRECT_KEY) === "1";
+    sessionStorage.removeItem(REDIRECT_KEY);
+  } catch {
+    /* storage blocked */
+  }
+  return started ? getRedirectResult(firebase().auth, browserPopupRedirectResolver) : null;
+}
+const REDIRECT_KEY = "papertrail:googleRedirect";
 
 export function errorCode(error: unknown) {
   return typeof error === "object" && error && "code" in error ? String((error as { code: unknown }).code) : "";
