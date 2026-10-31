@@ -91,6 +91,13 @@ const en = {
   "auth.error.popupBlocked": "Your browser blocked the Google window. Allow pop-ups for this site, then try again.",
   "auth.error.offline": "You're offline. Connect to the internet to sign in.",
   "auth.error.other": "Signing in didn't work. Try again in a moment.",
+  "auth.error.otherAccount": "You already have an account with that email, made another way. Sign in with your email and password instead.",
+  "auth.error.disabled": "This account has been switched off.",
+  "auth.error.domain": "Sign-in isn't allowed on this web address yet. (Firebase → Authentication → Settings → Authorized domains needs this site's address.)",
+  "auth.error.method": "This way of signing in isn't switched on yet. (Firebase → Authentication → Sign-in method.)",
+  "auth.error.settings": "The app's Firebase settings don't look right. (Check the NEXT_PUBLIC_FIREBASE_ settings in Vercel, then redeploy.)",
+  "login.errorCode": "Error code: {code}",
+  "login.demo.reminder": "Hi {name}, a friendly reminder that invoice {n} has {amount} still to pay by {date}. The PDF with our bank details is attached. Thank you!",
 
   // First visit
   "first.title": "Your first quote or invoice takes about two minutes.",
@@ -385,6 +392,13 @@ const af: Record<Key, string> = {
   "auth.error.popupBlocked": "Jou blaaier het die Google-venster geblokkeer. Laat opspringvensters vir hierdie werf toe en probeer weer.",
   "auth.error.offline": "Jy is aflyn. Koppel aan die internet om aan te teken.",
   "auth.error.other": "Aanteken het nie gewerk nie. Probeer oor 'n oomblik weer.",
+  "auth.error.otherAccount": "Jy het reeds 'n rekening met daardie e-pos, op 'n ander manier geskep. Teken eerder met jou e-pos en wagwoord aan.",
+  "auth.error.disabled": "Hierdie rekening is afgeskakel.",
+  "auth.error.domain": "Aanteken word nog nie op hierdie webadres toegelaat nie. (Firebase → Authentication → Settings → Authorized domains moet hierdie werf se adres hê.)",
+  "auth.error.method": "Hierdie manier van aanteken is nog nie aangeskakel nie. (Firebase → Authentication → Sign-in method.)",
+  "auth.error.settings": "Die app se Firebase-instellings lyk nie reg nie. (Kyk na die NEXT_PUBLIC_FIREBASE_-instellings in Vercel en ontplooi dan weer.)",
+  "login.errorCode": "Foutkode: {code}",
+  "login.demo.reminder": "Hallo {name}, 'n vriendelike herinnering dat faktuur {n} nog {amount} het om te betaal teen {date}. Die PDF met ons bankbesonderhede is aangeheg. Dankie!",
 
   "first.title": "Jou eerste kwotasie of faktuur neem omtrent twee minute.",
   "first.intro": "Voeg jou besigheidsbesonderhede een keer by. Voeg dan die werk by: PaperTrail werk die 15% BTW uit, nommer elke dokument en gee jou 'n netjiese PDF om te stuur.",

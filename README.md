@@ -34,7 +34,7 @@ with your documents on every device you sign in on.
   WhatsApp and email links and New quote / New invoice buttons that fill in their details.
 
 **Everywhere**
-- **Sign in** with email and password or Google, with **Forgot your password?**.
+- **Sign in** with email and password or Google, with **Forgot your password?**. If the browser blocks Google's pop-up window, the whole page goes to Google instead. Sign-in errors say what went wrong in plain words, with Firebase's error code underneath.
 - **Cloud sync**: documents are saved to your account, so they're on your phone and laptop. It also works
   offline and syncs when you're back online. The header shows if everything is saved.
 - **English or Afrikaans** for the app (the EN/AF button), and a separate setting for the language
@@ -51,9 +51,10 @@ The look comes from the carbon-copy duplicate books used at shop counters: a pal
 typewriter font, and rubber stamps for the status. Dark mode is the same book under a desk lamp at night.
 The quote or invoice itself is always white paper with one carbon-blue line, because that's what the client gets.
 
-The sign-in screen shows a photo (`public/login-photo.jpg`, free to use from Unsplash or Pexels) with dark
-fades at the top and bottom, so the logo and the white heading stay readable. If the photo is missing, the plain
-blue panel shows instead.
+On a laptop, the blue side of the sign-in screen shows three example cards with made-up details, so people see
+what PaperTrail does before they sign up: a quote the client accepted, the tax invoice made from it with 15% VAT
+and a part payment, and the WhatsApp reminder for what's still owed. The cards never overlap, and they follow the
+English/Afrikaans switch and dark mode.
 
 The first screen after signing up shows three real PaperTrail documents with made-up details, overlapping like
 pages on a desk (`components/SampleDocuments.tsx`). Each shows something the app does: a quote the client
