@@ -54,6 +54,11 @@ export function disconnect() {
   notify();
 }
 
+/** Who is signed in (for saving receipt photos, which aren't part of the synced data) */
+export function getUid(): string | null {
+  return uid;
+}
+
 export function getData(): AppData | null {
   return cache;
 }

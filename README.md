@@ -26,6 +26,18 @@ with your documents on every device you sign in on.
 - **Send or remind by WhatsApp or email**: opens your own WhatsApp or email app with the message written,
   including the amount still owed, the due date and your banking details. Nothing is sent until you press Send.
 
+**Expenses and profit**
+- **Add an expense** with who you paid, what for, a category (materials, fuel, tools, rent, phone, software,
+  bank fees, marketing or other), the amount and a **receipt photo** taken or chosen on the phone. The photo
+  is made small on the device first (at most 1400 pixels, under about 500 KB), so it saves quickly on mobile data.
+- For a VAT-registered business, tick that the receipt is a **tax invoice**, and the 15% VAT inside it is
+  worked out (R115 includes R15) so it can be claimed back.
+- **The money card** for this month, last month, the **2-month VAT period** or the **tax year** (March to
+  February): what you invoiced, what you spent, your **profit**, the money received from clients, and
+  **VAT owed to SARS** (VAT on your invoices minus the VAT you can claim), or how much SARS owes you.
+  Bars show where the money went. It's labelled as a guide, not tax advice.
+- **Download CSV** of the period's expenses for an accountant, and a **This month** line on the Overview.
+
 **Seeing where you stand**
 - **Overview**: collected, still owed, overdue and open quotes, money received per month for the last
   6 months, the overdue invoices with Remind buttons, and the latest documents.
@@ -42,7 +54,7 @@ with your documents on every device you sign in on.
   printed on documents.
 - **Light and dark mode**, remembered per device, with no flash when the page opens.
 - **Back, Forward and Refresh** buttons, and a **phone navigation bar** with a big + for new documents.
-- **Keyboard shortcuts**: N new invoice, Q new quote, / search, T theme, L language, G then O/D/C/S to
+- **Keyboard shortcuts**: N new invoice, Q new quote, / search, T theme, L language, G then O/D/C/E/S to
   change page, and ? for the list.
 - **Backup and restore** as one file.
 
@@ -72,9 +84,9 @@ Vitest, deployed on Vercel.
 
 ## Project structure
 ```
-app/              Pages: Overview (/), Documents, one document (/documents/[id]), Customers, Business details (/settings)
+app/              Pages: Overview (/), Documents, one document (/documents/[id]), Customers, Expenses and profit (/expenses), Business details (/settings)
 components/       The slips, stamps, editor, printable document, payments, sign-in screen, header, phone bar, shortcuts
-lib/              The logic: money, VAT and totals, dates, documents and payments, customers, messages, CSV,
+lib/              The logic: money, VAT and totals, dates, documents and payments, customers, expenses and profit, receipt photos, messages, CSV,
                   checking data, saving only what changed, Firebase, sign-in, and every label in English and Afrikaans
 tests/            Vitest tests (npm test)
 firestore.rules   The database rules: each person can only read and write their own data
@@ -88,13 +100,23 @@ firestore.rules   The database rules: each person can only read and write their 
 - **Rand and dates are formatted by hand** (`lib/money.ts`, `lib/dates.ts`), because browsers disagree about
   South African formatting, and an invoice must look the same on every device: `R 1 250,50`, `1 Sep 2026`.
 - **Each person's data lives under their own user ID** in Firestore (`lib/cloud.ts`): one record for the
-  business details and numbering, and one per quote or invoice.
+  business details and numbering, one per quote or invoice, one per expense, and one per receipt photo.
+- **Profit and VAT** (`lib/expenses.ts`): sales are the invoices sent in the period (quotes don't count);
+  the VAT you can claim on an expense is amount × 15/115, only if the receipt is a tax invoice and the
+  business is VAT-registered (it has a VAT number); VAT owed = VAT on invoices − VAT on expenses; profit =
+  sales without VAT − expenses without the VAT you can claim. The VAT period follows the 2-month periods most
+  small VAT vendors file (Jan–Feb … Nov–Dec), and the tax year runs from 1 March.
+- **Receipt photos are kept apart** from the expense list (`users/{id}/receipts/{expense id}`), and only
+  loaded when you press Receipt, so a long list of expenses stays quick. Firebase file storage needs a paid
+  plan, so each photo is shrunk on the phone (`lib/receipt-image.ts`) and saved as text in its own database
+  record, well under Firestore's 1 MB limit. Deleting an expense deletes its photo too.
 - **Only what changed is saved** (`lib/diff.ts` compares the old and new copies), and the screen updates
   straight away. Firestore keeps a copy on the device, so saving works offline and syncs later.
 - **Data is checked when it's read** (`lib/storage.ts`): broken, old or hand-edited data (from a backup
   file, or from PaperTrail 1) never crashes the app, and a lost counter is rebuilt from the highest number used.
 - **The real security is in `firestore.rules`**: a signed-in person can read and write only
-  `users/{their own user ID}`. Even a changed copy of the app can't reach anyone else's documents.
+  `users/{their own user ID}`. Even a changed copy of the app can't reach anyone else's documents. Expenses
+  must have a real date, a known category and a whole-number amount, and a receipt must be one JPEG under 750 KB.
 - **Every label is in `lib/i18n.ts`**, in English and Afrikaans. TypeScript checks that Afrikaans has every
   key, and `tests/i18n.test.ts` checks every label the code uses exists, with the same `{placeholders}`.
 - **Security headers** (`next.config.ts`): no framing by other sites, no type guessing, https only, and
@@ -152,6 +174,12 @@ and in Vercel. No secret or server-only keys are needed.
 - **No email verification** at sign-up: anyone can create an account, but each account only ever sees its own data.
 - **The database rules are tested by hand** in the Firebase console, not in the automatic tests.
 - English, Afrikaans and rand only.
+- **Receipt photos aren't in the backup file**, only the expenses themselves, so a backup stays small enough
+  to email. The photos stay safe in your account.
+- **VAT is worked out on the invoice basis** (by the date an invoice was sent). Small businesses on SARS's
+  payments basis count VAT when they're paid instead; the money card shows the money received too, but the
+  VAT figures follow the invoice dates.
+- **Expenses are typed in by hand**: PaperTrail doesn't read the amount from the receipt photo.
 
 ## Use of AI
 I built PaperTrail with Claude (by Anthropic) as my AI pair programmer:

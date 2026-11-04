@@ -32,6 +32,35 @@ service cloud.firestore {
           && request.resource.data.payments is list
           && request.resource.data.payments.size() <= 200;
       }
+
+      // One expense each
+      match /expenses/{expenseId} {
+        allow read, delete: if isOwner(userId);
+        allow create, update: if isOwner(userId)
+          && request.resource.data.keys().hasOnly(['id', 'date', 'supplier', 'description', 'category', 'amount', 'vatClaimable', 'hasReceipt', 'createdAt', 'updatedAt'])
+          && request.resource.data.id == expenseId
+          && request.resource.data.date is string
+          && request.resource.data.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+          && request.resource.data.supplier is string
+          && request.resource.data.supplier.size() <= 200
+          && request.resource.data.description is string
+          && request.resource.data.description.size() <= 500
+          && request.resource.data.category in ['materials', 'fuel', 'tools', 'rent', 'phone', 'software', 'bank', 'marketing', 'other']
+          && request.resource.data.amount is int
+          && request.resource.data.amount >= 0
+          && request.resource.data.vatClaimable is bool
+          && request.resource.data.hasReceipt is bool;
+      }
+
+      // The photo of a receipt: one small JPEG, stored as text
+      match /receipts/{expenseId} {
+        allow read, delete: if isOwner(userId);
+        allow create, update: if isOwner(userId)
+          && request.resource.data.keys().hasOnly(['image'])
+          && request.resource.data.image is string
+          && request.resource.data.image.size() <= 750000
+          && request.resource.data.image.matches('^data:image/jpeg;base64,.*');
+      }
     }
 
     // Everything else: closed

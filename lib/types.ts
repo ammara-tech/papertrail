@@ -70,9 +70,41 @@ export type Business = {
   docLanguage: Lang; // the language printed on quotes and invoices
 };
 
+/** What an expense was for, so the money page can show where the money goes */
+export type ExpenseCategory =
+  | "materials"
+  | "fuel"
+  | "tools"
+  | "rent"
+  | "phone"
+  | "software"
+  | "bank"
+  | "marketing"
+  | "other";
+
+/**
+ * Something the business paid for. amount is what was paid, VAT included.
+ * vatClaimable: the supplier charged VAT and the receipt is a tax invoice, so the VAT can be
+ * claimed back from SARS (only for VAT-registered businesses). The receipt photo, if there is
+ * one, is saved separately (lib/cloud.ts), so the list of expenses stays small and quick.
+ */
+export type Expense = {
+  id: string;
+  date: string; // YYYY-MM-DD
+  supplier: string;
+  description: string;
+  category: ExpenseCategory;
+  amount: number; // cents, VAT included
+  vatClaimable: boolean;
+  hasReceipt: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type AppData = {
   version: 2;
   business: Business;
   documents: Doc[];
+  expenses: Expense[];
   counters: Record<DocType, number>; // the last number used for each type
 };

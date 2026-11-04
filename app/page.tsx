@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useAppData } from "@/lib/store";
 import { balance, collectedByMonth, isOverdue, summary } from "@/lib/documents";
 import { customers } from "@/lib/customers";
+import { periods, summarise } from "@/lib/expenses";
 import { formatRand } from "@/lib/money";
 import { MONTHS, formatDate, todayISO } from "@/lib/dates";
 import { useLang, useT } from "@/components/LangProvider";
@@ -31,6 +32,7 @@ export default function OverviewPage() {
   const overdue = data.documents.filter((d) => isOverdue(d, today)).sort((a, b) => a.dueDate.localeCompare(b.dueDate));
   const latest = [...data.documents].sort((a, b) => (b.issueDate + b.createdAt).localeCompare(a.issueDate + a.createdAt)).slice(0, 3);
   const clientCount = customers(data.documents).length;
+  const month = summarise(data, periods(today).thisMonth);
 
   return (
     <div>
@@ -50,6 +52,27 @@ export default function OverviewPage() {
         <Tally label={t("overview.overdue")} value={formatRand(s.overdueAmount)} note={t("overview.onInvoices", { n: s.overdueCount })} alert={s.overdueCount > 0} />
         <Tally label={t("overview.openQuotes")} value={formatRand(s.openQuotesAmount)} note={t("overview.quotesWaiting", { n: s.openQuotesCount })} />
       </dl>
+
+      {/* This month's profit (and VAT owed), from Expenses and profit */}
+      <Link
+        href="/expenses"
+        className="mt-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-1 rounded-xl border border-line bg-sheet px-5 py-3 hover:border-carbon"
+      >
+        <span className="font-semibold">{t("overview.thisMonth")}</span>
+        <span className="text-sm text-ink-soft">
+          {month.profit >= 0 ? t("expenses.profit") : t("expenses.loss")}{" "}
+          <strong className={month.profit >= 0 ? "text-paid" : "text-overdue"}>{formatRand(Math.abs(month.profit))}</strong>
+          {month.vatRegistered && (
+            <>
+              {" · "}
+              {month.vatOwed >= 0 ? t("expenses.vatOwed") : t("expenses.vatRefund")} <strong className="text-ink">{formatRand(Math.abs(month.vatOwed))}</strong>
+            </>
+          )}
+          {" · "}
+          {t("overview.expensesCount", { n: data.expenses.filter((e) => e.date >= periods(today).thisMonth.from && e.date <= today).length })}
+        </span>
+        <span className="text-sm font-semibold text-carbon">{t("overview.seeExpenses")}</span>
+      </Link>
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[1.3fr_1fr]">
         <section aria-labelledby="chart-title" className="rounded-xl border border-line bg-sheet p-5">

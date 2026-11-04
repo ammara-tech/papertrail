@@ -18,10 +18,11 @@ import type { Key } from "@/lib/i18n";
   Phones and tablets: the name and the switches; the pages are in the bar at the bottom (PhoneNav).
 */
 
-export const NAV: { href: string; key: Key; icon: "home" | "slips" | "people" | "cog" }[] = [
+export const NAV: { href: string; key: Key; icon: "home" | "slips" | "people" | "receipt" | "cog" }[] = [
   { href: "/", key: "nav.overview", icon: "home" },
   { href: "/documents", key: "nav.documents", icon: "slips" },
   { href: "/customers", key: "nav.customers", icon: "people" },
+  { href: "/expenses", key: "nav.expenses", icon: "receipt" },
   { href: "/settings", key: "nav.business", icon: "cog" },
 ];
 

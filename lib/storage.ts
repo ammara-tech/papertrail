@@ -1,4 +1,4 @@
-import type { AppData, Business, Doc, LineItem, Payment, PaymentMethod } from "@/lib/types";
+import type { AppData, Business, Doc, Expense, ExpenseCategory, LineItem, Payment, PaymentMethod } from "@/lib/types";
 import { totals } from "@/lib/totals";
 
 /*
@@ -27,7 +27,7 @@ export const defaultBusiness: Business = {
 };
 
 export function emptyData(): AppData {
-  return { version: 2, business: { ...defaultBusiness }, documents: [], counters: { quote: 0, invoice: 0 } };
+  return { version: 2, business: { ...defaultBusiness }, documents: [], expenses: [], counters: { quote: 0, invoice: 0 } };
 }
 
 export const MAX_LOGO_CHARS = 280_000; // about a 200 KB picture, well under Firestore's 1 MB document limit
@@ -82,6 +82,27 @@ export function readDoc(v: unknown): Doc | null {
   return doc;
 }
 
+export const CATEGORIES: ExpenseCategory[] = ["materials", "fuel", "tools", "rent", "phone", "software", "bank", "marketing", "other"];
+
+/** An expense from the cloud or a backup file, or null if it's missing what it needs */
+export function readExpense(v: unknown): Expense | null {
+  const e = obj(v);
+  const amount = Math.round(num(e.amount));
+  if (!str(e.id) || !date(e.date) || !(amount >= 0) || amount > 1_000_000_000_00) return null;
+  return {
+    id: str(e.id, 100),
+    date: date(e.date),
+    supplier: str(e.supplier, 200),
+    description: str(e.description, 500),
+    category: CATEGORIES.includes(e.category as ExpenseCategory) ? (e.category as ExpenseCategory) : "other",
+    amount,
+    vatClaimable: e.vatClaimable === true,
+    hasReceipt: e.hasReceipt === true,
+    createdAt: str(e.createdAt, 40),
+    updatedAt: str(e.updatedAt, 40),
+  };
+}
+
 export function readBusiness(v: unknown): Business {
   const b = obj(v);
   const out = { ...defaultBusiness } as Record<string, unknown>;
@@ -100,6 +121,8 @@ export function readBusiness(v: unknown): Business {
 export function readData(v: unknown): AppData {
   const o = obj(v);
   const documents = Array.isArray(o.documents) ? o.documents.map(readDoc).filter((d): d is Doc => d !== null) : [];
+  // Backups and accounts from before expenses existed have none: that's fine
+  const expenses = Array.isArray(o.expenses) ? o.expenses.map(readExpense).filter((e): e is Expense => e !== null) : [];
   const c = obj(o.counters);
   // A counter is never lower than the highest number already used, so numbers never repeat
   const highest = (prefix: string) => Math.max(0, ...documents.filter((d) => d.number.startsWith(prefix)).map((d) => Number(d.number.split("-")[1]) || 0));
@@ -107,6 +130,7 @@ export function readData(v: unknown): AppData {
     version: 2,
     business: readBusiness(o.business),
     documents,
+    expenses,
     counters: { quote: Math.max(Math.round(num(c.quote)), highest("QUO-")), invoice: Math.max(Math.round(num(c.invoice)), highest("INV-")) },
   };
 }
