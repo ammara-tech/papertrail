@@ -11,7 +11,8 @@ import { useT } from "@/components/LangProvider";
 
 /*
   The bar at the bottom on phones: four pages (Overview, Documents, Customers, Expenses;
-  Business details is in the account menu at the top), with a big + in the middle for a
+  Stock and Business details are in the account menu at the top, and the Overview links to
+  Stock when something is running low), with a big + in the middle for a
   new quote or invoice, and back/forward/refresh above it when you open the + menu.
   It stays clear of the iPhone home bar (safe-area inset).
 */

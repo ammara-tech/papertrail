@@ -16,6 +16,7 @@ export type LineItem = {
   description: string;
   quantity: number; // can be a decimal, e.g. 1.5 hours
   unitPrice: number; // cents
+  stockId?: string; // the stock item this line came from (lib/stock.ts); invoices take it off what's left
 };
 
 export type Client = {
@@ -101,10 +102,27 @@ export type Expense = {
   updatedAt: string;
 };
 
+/**
+ * Something the business sells from a shelf. What's left isn't stored: it's worked out from
+ * `counted` and the invoices made since `countedAt` (lib/stock.ts), so it can never drift.
+ */
+export type StockItem = {
+  id: string;
+  name: string; // what goes on the invoice line, e.g. "Plascon Double Velvet 5L, white"
+  code: string; // your own product code, or ""
+  price: number; // selling price each, cents (VAT is added on the invoice if it's switched on)
+  counted: number; // how many there were when last counted, plus deliveries since
+  countedAt: string; // ISO timestamp of the last count
+  lowAt: number; // warn when this many or fewer are left (0: never warn)
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type AppData = {
   version: 2;
   business: Business;
   documents: Doc[];
   expenses: Expense[];
+  stock: StockItem[];
   counters: Record<DocType, number>; // the last number used for each type
 };

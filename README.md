@@ -38,9 +38,20 @@ with your documents on every device you sign in on.
   Bars show where the money went. It's labelled as a guide, not tax advice.
 - **Download CSV** of the period's expenses for an accountant, and a **This month** line on the Overview.
 
+**Stock**
+- **Your stock list**: the things you sell from the shelf (paint, taps, cables), with a price, an optional
+  product code, how many you have, and when to warn you.
+- **Taken off when you invoice**: on a quote or invoice line, pick **From your stock** to fill in the name and
+  price. Invoices take their quantity off what's left; quotes don't, until they become an invoice. The line
+  shows how many will be left, and warns you if you don't have enough.
+- **Low-stock warnings**: items that are running low or out are listed first on the Stock page, and the
+  Overview shows a warning that links there.
+- **Add stock** for a delivery, **Count** after you've counted the shelf, Edit and Delete. Deleting a stock item
+  keeps the invoice lines that used it.
+
 **Seeing where you stand**
 - **Overview**: collected, still owed, overdue and open quotes, money received per month for the last
-  6 months, the overdue invoices with Remind buttons, and the latest documents.
+  6 months, the overdue invoices with Remind buttons, the latest documents, and a warning when stock runs low.
 - **Documents**: every quote and invoice as a slip, with filters, search and **Download CSV** for Excel.
 - **Customers**: everyone you've quoted or invoiced, what they've been billed, paid and still owe, with
   WhatsApp and email links and New quote / New invoice buttons that fill in their details.
@@ -54,8 +65,8 @@ with your documents on every device you sign in on.
   printed on documents.
 - **Light and dark mode**, remembered per device, with no flash when the page opens.
 - **Back, Forward and Refresh** buttons, and a **phone navigation bar** with a big + for new documents.
-- **Keyboard shortcuts**: N new invoice, Q new quote, / search, T theme, L language, G then O/D/C/E/S to
-  change page, and ? for the list.
+- **Keyboard shortcuts**: N new invoice, Q new quote, / search, T theme, L language, G then O/D/C/E/K/S to
+  change page (K for stock), and ? for the list.
 - **Backup and restore** as one file.
 
 ## Design
@@ -84,9 +95,9 @@ Vitest, deployed on Vercel.
 
 ## Project structure
 ```
-app/              Pages: Overview (/), Documents, one document (/documents/[id]), Customers, Expenses and profit (/expenses), Business details (/settings)
+app/              Pages: Overview (/), Documents, one document (/documents/[id]), Customers, Expenses and profit (/expenses), Stock (/stock), Business details (/settings)
 components/       The slips, stamps, editor, printable document, payments, sign-in screen, header, phone bar, shortcuts
-lib/              The logic: money, VAT and totals, dates, documents and payments, customers, expenses and profit, receipt photos, messages, CSV,
+lib/              The logic: money, VAT and totals, dates, documents and payments, customers, expenses and profit, stock, receipt photos, messages, CSV,
                   checking data, saving only what changed, Firebase, sign-in, and every label in English and Afrikaans
 tests/            Vitest tests (npm test)
 firestore.rules   The database rules: each person can only read and write their own data
@@ -110,13 +121,18 @@ firestore.rules   The database rules: each person can only read and write their 
   loaded when you press Receipt, so a long list of expenses stays quick. Firebase file storage needs a paid
   plan, so each photo is shrunk on the phone (`lib/receipt-image.ts`) and saved as text in its own database
   record, well under Firestore's 1 MB limit. Deleting an expense deletes its photo too.
+- **Stock left is worked out, not stored** (`lib/stock.ts`): each item keeps the number you counted and when.
+  What's left = that number − the quantities on invoices made since then. So stock can never be taken off twice:
+  editing or deleting an invoice, or two devices saving at the same time, just changes the sum. Add stock adds to
+  the count; Count starts a new count from now. Stock items are saved one each, in `users/{id}/stock/{id}`.
 - **Only what changed is saved** (`lib/diff.ts` compares the old and new copies), and the screen updates
   straight away. Firestore keeps a copy on the device, so saving works offline and syncs later.
 - **Data is checked when it's read** (`lib/storage.ts`): broken, old or hand-edited data (from a backup
   file, or from PaperTrail 1) never crashes the app, and a lost counter is rebuilt from the highest number used.
 - **The real security is in `firestore.rules`**: a signed-in person can read and write only
   `users/{their own user ID}`. Even a changed copy of the app can't reach anyone else's documents. Expenses
-  must have a real date, a known category and a whole-number amount, and a receipt must be one JPEG under 750 KB.
+  must have a real date, a known category and a whole-number amount, and a receipt must be one JPEG under 750 KB. A stock item must have a name, a whole-number price and
+  counts that aren't below 0.
 - **Every label is in `lib/i18n.ts`**, in English and Afrikaans. TypeScript checks that Afrikaans has every
   key, and `tests/i18n.test.ts` checks every label the code uses exists, with the same `{placeholders}`.
 - **Security headers** (`next.config.ts`): no framing by other sites, no type guessing, https only, and
@@ -180,6 +196,10 @@ and in Vercel. No secret or server-only keys are needed.
   payments basis count VAT when they're paid instead; the money card shows the money received too, but the
   VAT figures follow the invoice dates.
 - **Expenses are typed in by hand**: PaperTrail doesn't read the amount from the receipt photo.
+- **Stock is simple on purpose**: one price per item (no buying price or profit per item), no variants like sizes
+  or colours, and no barcode scanning. A stock purchase is added as an expense separately.
+- **An invoice made before a recount** no longer counts against that item, because the count already includes it.
+  Count after you've invoiced the day's sales, not in the middle.
 
 ## Use of AI
 I built PaperTrail with Claude (by Anthropic) as my AI pair programmer:

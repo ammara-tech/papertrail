@@ -1,4 +1,4 @@
-import type { AppData, Business, Doc, Expense, ExpenseCategory, LineItem, Payment, PaymentMethod } from "@/lib/types";
+import type { AppData, Business, Doc, Expense, ExpenseCategory, LineItem, Payment, PaymentMethod, StockItem } from "@/lib/types";
 import { totals } from "@/lib/totals";
 
 /*
@@ -27,7 +27,7 @@ export const defaultBusiness: Business = {
 };
 
 export function emptyData(): AppData {
-  return { version: 2, business: { ...defaultBusiness }, documents: [], expenses: [], counters: { quote: 0, invoice: 0 } };
+  return { version: 2, business: { ...defaultBusiness }, documents: [], expenses: [], stock: [], counters: { quote: 0, invoice: 0 } };
 }
 
 export const MAX_LOGO_CHARS = 280_000; // about a 200 KB picture, well under Firestore's 1 MB document limit
@@ -41,7 +41,9 @@ const METHODS: PaymentMethod[] = ["eft", "cash", "card", "other"];
 function readItem(v: unknown, i: number): LineItem | null {
   if (!v || typeof v !== "object") return null;
   const o = obj(v);
-  return { id: str(o.id, 100) || `item-${i}`, description: str(o.description, 500), quantity: Math.max(0, num(o.quantity, 1)), unitPrice: Math.round(num(o.unitPrice)) };
+  const item: LineItem = { id: str(o.id, 100) || `item-${i}`, description: str(o.description, 500), quantity: Math.max(0, num(o.quantity, 1)), unitPrice: Math.round(num(o.unitPrice)) };
+  if (str(o.stockId, 100)) item.stockId = str(o.stockId, 100);
+  return item;
 }
 
 function readPayment(v: unknown, i: number): Payment | null {
@@ -103,6 +105,25 @@ export function readExpense(v: unknown): Expense | null {
   };
 }
 
+/** A stock item from the cloud or a backup file, or null if it's missing what it needs */
+export function readStock(v: unknown): StockItem | null {
+  const s = obj(v);
+  const name = str(s.name, 200).trim();
+  if (!str(s.id) || !name) return null;
+  const amount = (x: unknown) => Math.min(1_000_000, Math.max(0, num(x)));
+  return {
+    id: str(s.id, 100),
+    name,
+    code: str(s.code, 50),
+    price: Math.min(1_000_000_000_00, Math.max(0, Math.round(num(s.price)))),
+    counted: amount(s.counted),
+    countedAt: str(s.countedAt, 40) || str(s.createdAt, 40),
+    lowAt: amount(s.lowAt),
+    createdAt: str(s.createdAt, 40),
+    updatedAt: str(s.updatedAt, 40),
+  };
+}
+
 export function readBusiness(v: unknown): Business {
   const b = obj(v);
   const out = { ...defaultBusiness } as Record<string, unknown>;
@@ -123,6 +144,7 @@ export function readData(v: unknown): AppData {
   const documents = Array.isArray(o.documents) ? o.documents.map(readDoc).filter((d): d is Doc => d !== null) : [];
   // Backups and accounts from before expenses existed have none: that's fine
   const expenses = Array.isArray(o.expenses) ? o.expenses.map(readExpense).filter((e): e is Expense => e !== null) : [];
+  const stock = Array.isArray(o.stock) ? o.stock.map(readStock).filter((s): s is StockItem => s !== null) : [];
   const c = obj(o.counters);
   // A counter is never lower than the highest number already used, so numbers never repeat
   const highest = (prefix: string) => Math.max(0, ...documents.filter((d) => d.number.startsWith(prefix)).map((d) => Number(d.number.split("-")[1]) || 0));
@@ -131,6 +153,7 @@ export function readData(v: unknown): AppData {
     business: readBusiness(o.business),
     documents,
     expenses,
+    stock,
     counters: { quote: Math.max(Math.round(num(c.quote)), highest("QUO-")), invoice: Math.max(Math.round(num(c.invoice)), highest("INV-")) },
   };
 }

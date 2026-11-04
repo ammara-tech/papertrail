@@ -18,11 +18,12 @@ import type { Key } from "@/lib/i18n";
   Phones and tablets: the name and the switches; the pages are in the bar at the bottom (PhoneNav).
 */
 
-export const NAV: { href: string; key: Key; icon: "home" | "slips" | "people" | "receipt" | "cog" }[] = [
+export const NAV: { href: string; key: Key; icon: "home" | "slips" | "people" | "receipt" | "box" | "cog" }[] = [
   { href: "/", key: "nav.overview", icon: "home" },
   { href: "/documents", key: "nav.documents", icon: "slips" },
   { href: "/customers", key: "nav.customers", icon: "people" },
   { href: "/expenses", key: "nav.expenses", icon: "receipt" },
+  { href: "/stock", key: "nav.stock", icon: "box" },
   { href: "/settings", key: "nav.business", icon: "cog" },
 ];
 
@@ -106,6 +107,10 @@ function AccountMenu({ email }: { email: string }) {
       {open && (
         <div className="absolute right-0 top-11 w-64 rounded-xl border border-line bg-sheet p-2 shadow-lg">
           <p className="truncate px-3 py-2 text-sm text-ink-soft">{t("account.signedInAs", { email })}</p>
+          {/* Stock isn't in the phone's bottom bar (it has room for four pages), so it's here on phones */}
+          <Link href="/stock" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 hover:bg-page lg:hidden">
+            {t("nav.stock")}
+          </Link>
           <Link href="/settings" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 hover:bg-page">
             {t("nav.settings")}
           </Link>

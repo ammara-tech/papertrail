@@ -5,6 +5,7 @@ import { useAppData } from "@/lib/store";
 import { balance, collectedByMonth, isOverdue, summary } from "@/lib/documents";
 import { customers } from "@/lib/customers";
 import { periods, summarise } from "@/lib/expenses";
+import { lowStock } from "@/lib/stock";
 import { formatRand } from "@/lib/money";
 import { MONTHS, formatDate, todayISO } from "@/lib/dates";
 import { useLang, useT } from "@/components/LangProvider";
@@ -16,7 +17,7 @@ import FirstRun from "@/components/FirstRun";
 /*
   Overview: where the business stands today. Four tallies (collected, owed,
   overdue, open quotes), money received per month, the overdue invoices with
-  reminder buttons, and the latest documents.
+  reminder buttons, and the latest documents. A warning links to Stock when something is running low.
 */
 export default function OverviewPage() {
   const data = useAppData();
@@ -33,6 +34,7 @@ export default function OverviewPage() {
   const latest = [...data.documents].sort((a, b) => (b.issueDate + b.createdAt).localeCompare(a.issueDate + a.createdAt)).slice(0, 3);
   const clientCount = customers(data.documents).length;
   const month = summarise(data, periods(today).thisMonth);
+  const low = lowStock(data);
 
   return (
     <div>
@@ -73,6 +75,18 @@ export default function OverviewPage() {
         </span>
         <span className="text-sm font-semibold text-carbon">{t("overview.seeExpenses")}</span>
       </Link>
+
+      {/* Stock running low or out */}
+      {low.length > 0 && (
+        <Link
+          href="/stock"
+          className="mt-3 flex flex-wrap items-center justify-between gap-x-6 gap-y-1 rounded-xl border border-overdue/40 bg-sheet px-5 py-3 hover:border-overdue"
+        >
+          <span className="font-semibold text-overdue">{t("overview.lowStock", { n: low.length })}</span>
+          <span className="min-w-0 flex-1 truncate text-sm text-ink-soft">{low.slice(0, 3).map((s) => s.name).join(", ")}</span>
+          <span className="text-sm font-semibold text-carbon">{t("overview.seeStock")}</span>
+        </Link>
+      )}
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[1.3fr_1fr]">
         <section aria-labelledby="chart-title" className="rounded-xl border border-line bg-sheet p-5">

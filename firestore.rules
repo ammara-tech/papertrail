@@ -52,6 +52,27 @@ service cloud.firestore {
           && request.resource.data.hasReceipt is bool;
       }
 
+      // One stock item each. How many are left is worked out in the app from the invoices.
+      match /stock/{stockId} {
+        allow read, delete: if isOwner(userId);
+        allow create, update: if isOwner(userId)
+          && request.resource.data.keys().hasOnly(['id', 'name', 'code', 'price', 'counted', 'countedAt', 'lowAt', 'createdAt', 'updatedAt'])
+          && request.resource.data.id == stockId
+          && request.resource.data.name is string
+          && request.resource.data.name.size() > 0
+          && request.resource.data.name.size() <= 200
+          && request.resource.data.code is string
+          && request.resource.data.code.size() <= 50
+          && request.resource.data.price is int
+          && request.resource.data.price >= 0
+          && request.resource.data.counted is number
+          && request.resource.data.counted >= 0
+          && request.resource.data.counted <= 1000000
+          && request.resource.data.lowAt is number
+          && request.resource.data.lowAt >= 0
+          && request.resource.data.countedAt is string;
+      }
+
       // The photo of a receipt: one small JPEG, stored as text
       match /receipts/{expenseId} {
         allow read, delete: if isOwner(userId);

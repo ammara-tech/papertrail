@@ -1,8 +1,8 @@
-import type { AppData, Doc, Expense } from "@/lib/types";
+import type { AppData, Doc, Expense, StockItem } from "@/lib/types";
 
 /*
   What changed between two copies of the data, so lib/cloud.ts saves only that:
-  the documents and expenses that are new or different, the ones that were deleted, and
+  the documents, expenses and stock items that are new or different, the ones that were deleted, and
   whether the business details or numbering changed. Tested in tests/diff.test.ts.
 */
 
@@ -12,6 +12,8 @@ export type Changes = {
   deletes: string[];
   expenseUpserts: Expense[];
   expenseDeletes: string[];
+  stockUpserts: StockItem[];
+  stockDeletes: string[];
 };
 
 /** The items that are new or different, and the ids that were removed */
@@ -28,6 +30,7 @@ function listChanges<T extends { id: string }>(before: T[], after: T[]) {
 export function changesBetween(before: AppData, after: AppData): Changes {
   const docs = listChanges(before.documents, after.documents);
   const expenses = listChanges(before.expenses, after.expenses);
+  const stock = listChanges(before.stock, after.stock);
   return {
     profile:
       JSON.stringify(before.business) !== JSON.stringify(after.business) ||
@@ -36,8 +39,11 @@ export function changesBetween(before: AppData, after: AppData): Changes {
     deletes: docs.deletes,
     expenseUpserts: expenses.upserts,
     expenseDeletes: expenses.deletes,
+    stockUpserts: stock.upserts,
+    stockDeletes: stock.deletes,
   };
 }
 
 export const hasChanges = (c: Changes) =>
-  c.profile || c.upserts.length > 0 || c.deletes.length > 0 || c.expenseUpserts.length > 0 || c.expenseDeletes.length > 0;
+  c.profile || c.upserts.length > 0 || c.deletes.length > 0 || c.expenseUpserts.length > 0 || c.expenseDeletes.length > 0 ||
+  c.stockUpserts.length > 0 || c.stockDeletes.length > 0;

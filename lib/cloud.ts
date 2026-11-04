@@ -11,6 +11,7 @@ import { changesBetween, hasChanges } from "@/lib/diff";
     users/{their user id}                  business details and numbering
     users/{their user id}/documents/{id}   one quote or invoice each
     users/{their user id}/expenses/{id}    one expense each
+    users/{their user id}/stock/{id}       one stock item each
     users/{their user id}/receipts/{id}    the receipt photo for the expense with the same id
                                            (loaded only when you open it, so the app stays quick)
   The rules in firestore.rules let a signed-in person read and write only their own.
@@ -24,13 +25,14 @@ export function startSync(uid: string, onData: (s: Snapshot) => void, onError: (
   let profile: { value: unknown; pending: boolean } | null = null;
   let docs: { value: unknown[]; pending: boolean } | null = null;
   let expenses: { value: unknown[]; pending: boolean } | null = null;
+  let stock: { value: unknown[]; pending: boolean } | null = null;
 
   const emit = () => {
-    if (!profile || !docs || !expenses) return; // wait until all three have arrived
+    if (!profile || !docs || !expenses || !stock) return; // wait until all four have arrived
     const p = (profile.value ?? {}) as Record<string, unknown>;
     onData({
-      data: readData({ business: p.business, counters: p.counters, documents: docs.value, expenses: expenses.value }),
-      pending: profile.pending || docs.pending || expenses.pending,
+      data: readData({ business: p.business, counters: p.counters, documents: docs.value, expenses: expenses.value, stock: stock.value }),
+      pending: profile.pending || docs.pending || expenses.pending || stock.pending,
     });
   };
 
@@ -61,10 +63,20 @@ export function startSync(uid: string, onData: (s: Snapshot) => void, onError: (
     },
     onError,
   );
+  const stopStock = onSnapshot(
+    collection(db, "users", uid, "stock"),
+    { includeMetadataChanges: true },
+    (snap) => {
+      stock = { value: snap.docs.map((d) => d.data()), pending: snap.metadata.hasPendingWrites };
+      emit();
+    },
+    onError,
+  );
   return () => {
     stopProfile();
     stopDocs();
     stopExpenses();
+    stopStock();
   };
 }
 
@@ -82,6 +94,8 @@ export async function saveChanges(uid: string, before: AppData, after: AppData) 
     ops.push((b) => b.delete(doc(db, "users", uid, "expenses", id)));
     ops.push((b) => b.delete(doc(db, "users", uid, "receipts", id))); // its photo goes too (fine if there wasn't one)
   }
+  for (const s of c.stockUpserts) ops.push((b) => b.set(doc(db, "users", uid, "stock", s.id), s));
+  for (const id of c.stockDeletes) ops.push((b) => b.delete(doc(db, "users", uid, "stock", id)));
   // Firestore allows up to 500 changes per batch (a big backup restore can be more)
   for (let i = 0; i < ops.length; i += 450) {
     const batch = writeBatch(db);

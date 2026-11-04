@@ -21,6 +21,7 @@ const LIST: [string, Key][] = [
   ["G D", "shortcuts.documents"],
   ["G C", "shortcuts.customers"],
   ["G E", "shortcuts.expenses"],
+  ["G K", "shortcuts.stock"],
   ["G S", "shortcuts.settings"],
   ["T", "shortcuts.theme"],
   ["L", "shortcuts.language"],
@@ -45,7 +46,7 @@ export default function Shortcuts() {
       if (e.ctrlKey || e.metaKey || e.altKey || isTyping(e.target)) return;
       const k = e.key.toLowerCase();
       if (Date.now() - goPressedAt < 1500) {
-        const pages: Record<string, string> = { o: "/", d: "/documents", c: "/customers", e: "/expenses", s: "/settings" };
+        const pages: Record<string, string> = { o: "/", d: "/documents", c: "/customers", e: "/expenses", k: "/stock", s: "/settings" };
         const to = pages[k];
         goPressedAt = 0;
         if (to) {

@@ -2,14 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Business, Client, Doc, LineItem } from "@/lib/types";
-import { getData, setData } from "@/lib/store";
+import type { Business, Client, Doc, LineItem, StockItem } from "@/lib/types";
+import { getData, setData, useAppData } from "@/lib/store";
 import { balance, blankItem, convertToInvoice, deleteDocument, duplicateDocument, isOverdue, markPaid, stampFor, updateDocument } from "@/lib/documents";
 import { customerKey, customers } from "@/lib/customers";
 import { lineTotal } from "@/lib/totals";
 import { formatRand } from "@/lib/money";
 import { todayISO } from "@/lib/dates";
-import { useT } from "@/components/LangProvider";
+import { formatQty, lineFromStock, stockForDocument, withoutStock } from "@/lib/stock";
+import { useLang, useT } from "@/components/LangProvider";
 import DocumentSheet from "@/components/DocumentSheet";
 import PriceInput from "@/components/PriceInput";
 import Stamp from "@/components/Stamp";
@@ -20,10 +21,14 @@ import SendButtons from "@/components/SendButtons";
   Editing a quote or invoice. Every change is saved straight away (to the account, or on
   the device until it's back online), and the preview beside the form (behind the Preview
   tab on phones) is exactly what prints. Download PDF uses the browser's "Save as PDF".
+  If you keep stock, each line can be picked "From your stock" (lib/stock.ts): it fills in the
+  name and price, and an invoice takes it off what's left.
 */
 export default function DocumentEditor({ doc, business, documents }: { doc: Doc; business: Business; documents: Doc[] }) {
   const router = useRouter();
   const t = useT();
+  const lang = useLang();
+  const stock: StockItem[] = useAppData()?.stock ?? [];
   const [tab, setTab] = useState<"edit" | "preview">("edit");
   const [landed, setLanded] = useState(false); // the stamp lands only when you change the status
   const today = todayISO();
@@ -33,6 +38,13 @@ export default function DocumentEditor({ doc, business, documents }: { doc: Doc;
 
   const change = (c: Partial<Doc>) => setData((d) => updateDocument(d, doc.id, c));
   const changeItem = (id: string, c: Partial<LineItem>) => change({ items: doc.items.map((i) => (i.id === id ? { ...i, ...c } : i)) });
+  const replaceItem = (id: string, make: (i: LineItem) => LineItem) => change({ items: doc.items.map((i) => (i.id === id ? make(i) : i)) });
+  const sortedStock = [...stock].sort((a, b) => a.name.localeCompare(b.name));
+
+  function pickStock(line: LineItem, stockId: string) {
+    const item = stock.find((s) => s.id === stockId);
+    replaceItem(line.id, (i) => (item ? lineFromStock(i, item) : withoutStock(i)));
+  }
 
   // Typing a name you've used before fills in that client's details
   function changeClientName(name: string) {
@@ -189,8 +201,24 @@ export default function DocumentEditor({ doc, business, documents }: { doc: Doc;
           <fieldset className="rounded-xl border border-line bg-sheet p-5">
             <legend className="px-1 font-semibold">{t("editor.work")}</legend>
             <ul className="space-y-4">
-              {doc.items.map((item, n) => (
+              {doc.items.map((item, n) => {
+                const fromStock = item.stockId ? stock.find((s) => s.id === item.stockId) : undefined;
+                const level = fromStock ? stockForDocument(doc, fromStock, documents) : null;
+                return (
                 <li key={item.id} className="rounded-lg bg-page/70 p-3">
+                  {stock.length > 0 && (
+                    <label className="mb-2 block text-sm text-ink-soft">
+                      {t("editor.fromStock")}
+                      <select className="field" value={fromStock ? fromStock.id : ""} onChange={(e) => pickStock(item, e.target.value)}>
+                        <option value="">{t("editor.notFromStock")}</option>
+                        {sortedStock.map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.name} · {formatRand(s.price)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
                   <label className="block text-sm text-ink-soft">
                     {t("editor.line", { n: n + 1 })}
                     <textarea className="field" rows={1} placeholder={t("editor.linePlaceholder")} value={item.description} onChange={(e) => changeItem(item.id, { description: e.target.value })} />
@@ -214,13 +242,23 @@ export default function DocumentEditor({ doc, business, documents }: { doc: Doc;
                     </label>
                     <p className="pb-2 text-right font-semibold">{formatRand(lineTotal(item))}</p>
                   </div>
+                  {level && (
+                    <p className={`mt-2 text-sm ${level.after < 0 ? "font-semibold text-overdue" : "text-ink-soft"}`} role={level.after < 0 ? "alert" : undefined}>
+                      {level.after < 0
+                        ? t("editor.stockShort", { n: formatQty(Math.max(0, level.available), lang) })
+                        : isQuote
+                          ? t("editor.stockLeftQuote", { n: formatQty(level.available, lang) })
+                          : t("editor.stockLeft", { n: formatQty(level.after, lang) })}
+                    </p>
+                  )}
                   {doc.items.length > 1 && (
                     <button type="button" onClick={() => change({ items: doc.items.filter((i) => i.id !== item.id) })} className="mt-2 text-sm text-overdue underline-offset-2 hover:underline">
                       {t("editor.removeLine", { n: n + 1 })}
                     </button>
                   )}
                 </li>
-              ))}
+                );
+              })}
             </ul>
             <button type="button" onClick={() => change({ items: [...doc.items, blankItem()] })} className="mt-4 rounded-lg border-2 border-dashed border-line px-4 py-2 font-semibold text-carbon hover:border-carbon">
               {t("editor.addLine")}
