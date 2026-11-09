@@ -10,6 +10,8 @@ import PhoneNav from "@/components/PhoneNav";
 import Shortcuts from "@/components/Shortcuts";
 import LoginScreen from "@/components/LoginScreen";
 import Logo from "@/components/Logo";
+import DemoBanner from "@/components/DemoBanner";
+import { seedDemoOnce } from "@/lib/demo";
 
 /*
   Wraps every page. Until someone is signed in, it shows the sign-in screen instead
@@ -37,6 +39,13 @@ function Gate({ children }: { children: React.ReactNode }) {
     else disconnect();
   }, [uid]);
 
+  // "Try the demo": a guest with no documents yet gets a made-up business, once (lib/demo.ts)
+  const demo = auth.status === "signedIn" && auth.user.isAnonymous;
+  const empty = Boolean(data && data.documents.length === 0 && data.expenses.length === 0);
+  useEffect(() => {
+    if (demo && uid && data) seedDemoOnce(uid, empty);
+  }, [demo, uid, data, empty]);
+
   if (!firebaseConfigured) return <SetupNeeded />;
   // Until Firebase has checked, both screens are on the page and the saved hint picks one
   // (see lib/auth.ts). The sign-in screen stays in the same place, so nothing typed is lost.
@@ -60,6 +69,7 @@ function Gate({ children }: { children: React.ReactNode }) {
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-sheet focus:px-4 focus:py-2 focus:text-carbon">
         {t("app.skip")}
       </a>
+      {demo && <DemoBanner />}
       <Header email={auth.user.email ?? ""} />
       <main id="main" className="mx-auto max-w-6xl px-4 pb-28 pt-8 sm:px-6 lg:pb-20 print:p-0">
         {children}

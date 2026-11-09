@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { endDemo } from "@/lib/demo";
+import { firebase } from "@/lib/firebase";
 import type { Business, Lang } from "@/lib/types";
 import { getData, setData, useAppData } from "@/lib/store";
 import { MAX_LOGO_CHARS, parseData } from "@/lib/storage";
@@ -155,7 +157,7 @@ export default function SettingsPage() {
         <fieldset className="rounded-xl border border-line bg-sheet p-5">
           <legend className="px-1 font-semibold">{t("settings.account")}</legend>
           <p className="text-[15px] text-ink-soft">{t("settings.accountIntro")}</p>
-          <button type="button" onClick={() => signOutUser()} className="mt-4 rounded-lg border border-line px-4 py-2 font-semibold text-overdue hover:border-overdue">
+          <button type="button" onClick={() => (firebase().auth.currentUser?.isAnonymous ? endDemo() : signOutUser())} className="mt-4 rounded-lg border border-line px-4 py-2 font-semibold text-overdue hover:border-overdue">
             {t("account.signOut")}
           </button>
         </fieldset>

@@ -68,6 +68,10 @@ with your documents on every device you sign in on.
 - **Keyboard shortcuts**: N new invoice, Q new quote, / search, T theme, L language, G then O/D/C/E/K/S to
   change page (K for stock), and ? for the list.
 - **Backup and restore** as one file.
+- **Try the demo**, with no account: you're signed in as a guest with a made-up plumbing business already set up:
+  quotes (one accepted), an invoice with a part payment, a paid one, an overdue one, expenses and stock (one item running
+  low), all dated from today. A strip at the top says it's a demo, in English or Afrikaans, and **End the demo** deletes
+  everything and the guest account. A link ending in `?demo` puts the demo button at the top of the sign-in screen.
 
 ## Design
 The look comes from the carbon-copy duplicate books used at shop counters: a pale carbon-paper blue page,
@@ -104,6 +108,13 @@ firestore.rules   The database rules: each person can only read and write their 
 ```
 
 ## How the important parts work
+
+**Try the demo** (`lib/demo.ts`, `lib/demo-data.ts`). The guest is signed in with Firebase's anonymous sign-in, so
+they get their own private account and the same security rules protect them as anyone else. The first time a guest has
+no documents, the made-up business is added through the normal save (once: a note on the device remembers). Its dates
+are worked out from today, so the demo always has something due, overdue and paid. Ending the demo deletes the guest's
+documents, expenses, stock, receipt photos and profile, then the guest account itself.
+
 - **Money is stored in cents** (whole numbers), so adding up never gives answers like `R 0,30000000004`.
   `lib/totals.ts` adds the lines, takes off the discount, then adds VAT on what's left, rounding once per step.
 - **An invoice's state comes from its payments** (`lib/documents.ts`): nothing paid is Unpaid, some is
@@ -144,7 +155,7 @@ You need Node.js 22 or newer and a free Google account.
 ### 1. Firebase (about 10 minutes)
 1. Go to [console.firebase.google.com](https://console.firebase.google.com) and **Create a project**
    (Google Analytics isn't needed).
-2. **Authentication → Get started → Sign-in method**: turn on **Email/Password** and **Google**.
+2. **Authentication → Get started → Sign-in method**: turn on **Email/Password**, **Google** and **Anonymous** (for Try the demo).
 3. **Firestore Database → Create database**: choose the location closest to your users
    (for South Africa, `africa-south1` (Johannesburg)), and start in **production mode**.
 4. **Firestore Database → Rules**: replace everything with the contents of [`firestore.rules`](firestore.rules),
@@ -182,6 +193,8 @@ anything. What protects the data is `firestore.rules`. They're still kept out of
 and in Vercel. No secret or server-only keys are needed.
 
 ## Known gaps
+- **Demos that are never ended stay in the database.** If a guest just closes the tab, their made-up business and
+  guest account stay in Firebase. It's small, and the free plan has plenty of room, but nothing cleans it up automatically yet.
 - **Two devices offline at the same time** could each give out the same next number. It's very unlikely
   (both offline, both creating a document) and noticeable, so it's left as a known limit.
 - **PDFs come from the browser's "Save as PDF"**, so the exact look can differ slightly between browsers.

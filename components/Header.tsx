@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { endDemo } from "@/lib/demo";
+import { firebase } from "@/lib/firebase";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import NewDocumentButtons from "@/components/NewDocumentButtons";
@@ -117,7 +119,7 @@ function AccountMenu({ email }: { email: string }) {
           <button type="button" onClick={() => window.dispatchEvent(new Event("papertrail:shortcuts"))} className="block w-full rounded-md px-3 py-2 text-left hover:bg-page">
             {t("shortcuts.title")}
           </button>
-          <button type="button" onClick={() => signOutUser()} className="block w-full rounded-md px-3 py-2 text-left text-overdue hover:bg-page">
+          <button type="button" onClick={() => (firebase().auth.currentUser?.isAnonymous ? endDemo() : signOutUser())} className="block w-full rounded-md px-3 py-2 text-left text-overdue hover:bg-page">
             {t("account.signOut")}
           </button>
         </div>

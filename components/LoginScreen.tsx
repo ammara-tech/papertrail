@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { authErrorKey, errorCode, finishRedirectSignIn, resetPassword, signInEmail, signInGoogle, signUpEmail } from "@/lib/auth";
+import { authErrorKey, errorCode, finishRedirectSignIn, resetPassword, signInDemo, signInEmail, signInGoogle, signUpEmail } from "@/lib/auth";
 import { useLang, useT } from "@/components/LangProvider";
 import { LangToggle, ThemeToggle } from "@/components/Toggles";
 import Logo from "@/components/Logo";
@@ -23,6 +23,11 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ ok: boolean; key: Key; code?: string } | null>(null);
+  // Opened from a "Try the demo" link (…/?demo): the demo box goes to the top
+  const [fromDemoLink, setFromDemoLink] = useState(false);
+  useEffect(() => {
+    setFromDemoLink(new URLSearchParams(window.location.search).has("demo"));
+  }, []);
 
   // If Google sign-in went the full-page way and failed, say why when the page comes back.
   useEffect(() => {
@@ -51,6 +56,16 @@ export default function LoginScreen() {
     run(() => (mode === "signIn" ? signInEmail(email, password) : signUpEmail(email, password)));
   }
 
+  const demoBox = (
+    <div className="rounded-xl border border-dashed border-carbon/40 bg-carbon-soft p-4">
+      <p className="font-bold">{t("demo.title")}</p>
+      <p className="mt-1 text-sm text-ink-soft">{t("demo.text")}</p>
+      <button type="button" disabled={busy} onClick={() => run(signInDemo)} className="mt-3 w-full rounded-lg bg-carbon px-4 py-2.5 font-semibold text-on-carbon hover:opacity-90 disabled:opacity-60">
+        {t("demo.button")}
+      </button>
+    </div>
+  );
+
   return (
     <div className="grid min-h-screen lg:grid-cols-[1.05fr_1fr]">
       <aside className="relative hidden overflow-hidden bg-[#1e3a8a] p-12 text-white lg:flex lg:flex-col">
@@ -76,6 +91,7 @@ export default function LoginScreen() {
         </div>
 
         <div className="m-auto w-full max-w-sm py-10">
+          {fromDemoLink && <div className="mb-8">{demoBox}</div>}
           <h2 className="text-3xl font-bold tracking-tight">{mode === "signIn" ? t("login.welcomeBack") : t("login.createTitle")}</h2>
           <p className="mt-2 text-ink-soft">{mode === "signIn" ? t("login.signInIntro") : t("login.createIntro")}</p>
 
@@ -161,6 +177,7 @@ export default function LoginScreen() {
               {mode === "signIn" ? t("login.toCreate") : t("login.toSignIn")}
             </button>
           </p>
+          {!fromDemoLink && <div className="mt-6">{demoBox}</div>}
           <p className="mt-6 text-sm text-ink-soft">{t("login.privacy")}</p>
         </div>
       </main>

@@ -11,6 +11,7 @@ import {
   signInWithPopup,
   getRedirectResult,
   signInWithRedirect,
+  signInAnonymously,
   signOut,
   type User,
 } from "firebase/auth";
@@ -98,6 +99,12 @@ const REDIRECT_KEY = "papertrail:googleRedirect";
 export function errorCode(error: unknown) {
   return typeof error === "object" && error && "code" in error ? String((error as { code: unknown }).code) : "";
 }
+/**
+ * "Try the demo": signs in as a guest, with no email or password. Firebase gives the guest their
+ * own private account, so the security rules work exactly as for anyone else, and the app fills it
+ * with an example business (lib/demo.ts). Ending the demo deletes the data and the guest account.
+ */
+export const signInDemo = () => signInAnonymously(firebase().auth);
 export const resetPassword = (email: string) => sendPasswordResetEmail(firebase().auth, email.trim());
 export const signOutUser = () => signOut(firebase().auth);
 
