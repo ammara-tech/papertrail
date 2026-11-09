@@ -74,7 +74,7 @@ export default function LoginScreen() {
           PaperTrail
         </p>
         <DemoDocs />
-        <h1 className="relative mt-auto max-w-md text-5xl font-bold leading-[1.05] tracking-tight">{t("login.tagline")}</h1>
+        <p className="relative mt-auto max-w-md text-5xl font-bold leading-[1.05] tracking-tight">{t("login.tagline")}</p>
         <p className="relative mt-5 max-w-md text-lg text-white/85">{t("login.pitch")}</p>
       </aside>
 
@@ -92,7 +92,7 @@ export default function LoginScreen() {
 
         <div className="m-auto w-full max-w-sm py-10">
           {fromDemoLink && <div className="mb-8">{demoBox}</div>}
-          <h2 className="text-3xl font-bold tracking-tight">{mode === "signIn" ? t("login.welcomeBack") : t("login.createTitle")}</h2>
+          <h1 className="text-3xl font-bold tracking-tight">{mode === "signIn" ? t("login.welcomeBack") : t("login.createTitle")}</h1>
           <p className="mt-2 text-ink-soft">{mode === "signIn" ? t("login.signInIntro") : t("login.createIntro")}</p>
 
           <button
