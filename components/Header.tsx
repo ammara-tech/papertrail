@@ -9,15 +9,18 @@ import NewDocumentButtons from "@/components/NewDocumentButtons";
 import NavArrows from "@/components/NavArrows";
 import SyncBadge from "@/components/SyncBadge";
 import Logo from "@/components/Logo";
+import Icon from "@/components/Icon";
 import { LangToggle, ThemeToggle } from "@/components/Toggles";
 import { useT } from "@/components/LangProvider";
 import { signOutUser } from "@/lib/auth";
 import type { Key } from "@/lib/i18n";
 
 /*
-  The top bar on every page (hidden when printing).
-  Laptops: the pages, back/forward/refresh, language, theme, saving status, account and New buttons.
-  Phones and tablets: the name and the switches; the pages are in the bar at the bottom (PhoneNav).
+  The navigation, laid out like accounting software (hidden when printing).
+  Laptops: a sidebar down the left with the pages, New quote and New invoice, and at the
+  bottom the saving status, language, theme and your account.
+  Phones and tablets: a slim bar at the top with the name and the switches; the pages are in
+  the bar at the bottom (PhoneNav).
 */
 
 export const NAV: { href: string; key: Key; icon: "home" | "slips" | "people" | "receipt" | "box" | "cog" }[] = [
@@ -40,43 +43,69 @@ export default function Header({ email }: { email: string }) {
   const t = useT();
 
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-sheet/90 backdrop-blur print:hidden">
-      <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2.5 sm:px-6">
-        <NavArrows className="hidden lg:flex" />
-        <Link href="/" className="flex shrink-0 items-center gap-2 text-xl font-bold tracking-tight text-carbon">
-          <Logo />
+    <>
+      {/* Laptops: the sidebar */}
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-line bg-sheet lg:flex print:hidden">
+        <Link href="/" className="font-display flex items-center gap-2.5 px-6 pb-2 pt-6 text-2xl font-semibold tracking-tight text-carbon">
+          <Logo className="h-9 w-9" />
           PaperTrail
         </Link>
-        <nav aria-label={t("nav.main")} className="ml-2 hidden gap-1 lg:flex">
-          {NAV.map((l) => {
-            const active = isActive(pathname, l.href);
-            return (
-              <Link
-                key={l.href}
-                href={l.href}
-                aria-current={active ? "page" : undefined}
-                className={`whitespace-nowrap rounded-md px-3 py-1.5 text-[15px] transition-colors ${active ? "bg-carbon-soft font-semibold text-carbon" : "text-ink-soft hover:text-carbon"}`}
-              >
-                {t(l.key)}
-              </Link>
-            );
-          })}
+        <p className="px-6 font-type text-xs text-number">{t("login.sheet.ledger")}</p>
+        <div className="mt-6 px-4">
+          <NewDocumentButtons size="small" />
+        </div>
+        <nav aria-label={t("nav.main")} className="mt-6 flex-1 overflow-y-auto px-3">
+          <ul className="space-y-1">
+            {NAV.map((l) => {
+              const active = isActive(pathname, l.href);
+              return (
+                <li key={l.href}>
+                  <Link
+                    href={l.href}
+                    aria-current={active ? "page" : undefined}
+                    className={`flex items-center gap-3 rounded-lg border-l-4 px-3 py-2.5 text-[15px] transition-colors ${active ? "border-number bg-carbon-soft font-semibold text-carbon" : "border-transparent text-ink-soft hover:bg-page hover:text-carbon"}`}
+                  >
+                    <Icon name={l.icon} className="h-5 w-5" />
+                    {t(l.key)}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
         </nav>
-        <div className="ml-auto flex shrink-0 items-center gap-1.5">
-          <SyncBadge />
-          <LangToggle />
-          <ThemeToggle />
-          <AccountMenu email={email} />
-          <div className="ml-2 hidden shrink-0 xl:block">
-            <NewDocumentButtons size="small" />
+        <div className="border-t border-line p-4">
+          <NavArrows className="mb-3" />
+          <div className="flex items-center gap-1.5">
+            <SyncBadge />
+            <LangToggle />
+            <ThemeToggle />
+            <div className="ml-auto">
+              <AccountMenu email={email} up />
+            </div>
           </div>
         </div>
-      </div>
-    </header>
+      </aside>
+
+      {/* Phones and tablets: a slim bar at the top */}
+      <header className="sticky top-0 z-30 border-b border-line bg-sheet/90 backdrop-blur lg:hidden print:hidden">
+        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2.5 sm:px-6">
+          <Link href="/" className="font-display flex shrink-0 items-center gap-2 text-xl font-semibold tracking-tight text-carbon">
+            <Logo />
+            PaperTrail
+          </Link>
+          <div className="ml-auto flex shrink-0 items-center gap-1.5">
+            <SyncBadge />
+            <LangToggle />
+            <ThemeToggle />
+            <AccountMenu email={email} />
+          </div>
+        </div>
+      </header>
+    </>
   );
 }
 
-function AccountMenu({ email }: { email: string }) {
+function AccountMenu({ email, up = false }: { email: string; up?: boolean }) {
   const t = useT();
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
@@ -107,7 +136,7 @@ function AccountMenu({ email }: { email: string }) {
         {(email[0] ?? "?").toUpperCase()}
       </button>
       {open && (
-        <div className="absolute right-0 top-11 w-64 rounded-xl border border-line bg-sheet p-2 shadow-lg">
+        <div className={`absolute right-0 z-40 w-64 rounded-xl border border-line bg-sheet p-2 shadow-lg ${up ? "bottom-11" : "top-11"}`}>
           <p className="truncate px-3 py-2 text-sm text-ink-soft">{t("account.signedInAs", { email })}</p>
           {/* Stock isn't in the phone's bottom bar (it has room for four pages), so it's here on phones */}
           <Link href="/stock" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 hover:bg-page lg:hidden">

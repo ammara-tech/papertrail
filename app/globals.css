@@ -1,25 +1,25 @@
 @import "tailwindcss";
 
 /*
-  PaperTrail's look: a carbon-copy duplicate book.
-  Pale carbon-paper blue page, yellow quote copies and pink invoice copies,
-  a red pre-printed number, and rubber stamps for the status.
-  Dark mode is the same book under a desk lamp at night: deep carbon blue, with the
-  slips dimmed but still yellow and pink. The quote or invoice itself (the "paper")
+  PaperTrail's look: a bookkeeper's desk with stationery on it.
+  Cream desk paper, navy ink, serif headings like a printed letterhead, yellow quote copies
+  and pink invoice copies, a red pre-printed number, and rubber stamps for the status.
+  On a laptop the pages are in a sidebar, like accounting software.
+  Dark mode is the same desk at night: dark walnut, with the slips dimmed but still yellow and pink. The quote or invoice itself (the "paper")
   is always white, in both themes and when printed, because that's what the client gets.
 */
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme {
-  --color-page: #eef2f9; /* carbon paper: the background */
-  --color-sheet: #ffffff; /* panels and forms */
-  --color-ink: #1b2233; /* text */
-  --color-ink-soft: #4b5570; /* quieter text (passes AA on page, sheet and both slips) */
-  --color-carbon: #1e3a8a; /* carbon-copy blue: headings, links, buttons, focus */
+  --color-page: #f3eee3; /* cream desk paper: the background */
+  --color-sheet: #fffdf8; /* panels and forms */
+  --color-ink: #23262f; /* text */
+  --color-ink-soft: #545866; /* quieter text (passes AA on page, sheet and both slips) */
+  --color-carbon: #1f2f5c; /* navy ink: headings, links, buttons, focus */
   --color-on-carbon: #ffffff; /* text on carbon blue */
-  --color-carbon-soft: #dbe4f7;
-  --color-line: #cfd8ea;
+  --color-carbon-soft: #e3e6ef;
+  --color-line: #ddd5c3;
 
   --color-quote: #fff1a8; /* yellow copy */
   --color-quote-edge: #e3c44a;
@@ -40,19 +40,20 @@
   --color-paper-line: #cfd8ea;
   --color-paper-accent: #1e3a8a;
 
-  --font-sans: var(--font-familjen), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-plex), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces, Georgia), Georgia, serif; /* letterhead headings */
   --font-type: var(--font-courier), ui-monospace, monospace; /* numbering machine: slip numbers only */
 }
 
 :root[data-theme="dark"] {
-  --color-page: #0e1628;
-  --color-sheet: #172138;
-  --color-ink: #e8ecf5;
-  --color-ink-soft: #a7b2cc;
-  --color-carbon: #9db8ff;
-  --color-on-carbon: #0e1628;
-  --color-carbon-soft: #24345c;
-  --color-line: #2c3a5c;
+  --color-page: #16130e;
+  --color-sheet: #221d16;
+  --color-ink: #f0eadc;
+  --color-ink-soft: #b9b09f;
+  --color-carbon: #a9bcf2;
+  --color-on-carbon: #16130e;
+  --color-carbon-soft: #2b2f40;
+  --color-line: #3b3428;
   --color-quote: #4a4117;
   --color-quote-edge: #8f7d2c;
   --color-invoice: #4d2232;
@@ -180,4 +181,37 @@ body {
 html[data-signed-in] .gate-login,
 html:not([data-signed-in]) .gate-splash {
   display: none;
+}
+
+/* Letterhead headings: the big titles on every page are set in a serif, like printed stationery */
+main h1,
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+/* The sign-in desk: a faint ruled-paper texture under the invoice */
+.desk {
+  background-color: var(--color-page);
+  background-image: repeating-linear-gradient(0deg, transparent 0 31px, color-mix(in srgb, var(--color-line) 55%, transparent) 31px 32px);
+}
+
+/* Form fields on the sign-in invoice look like the lines you fill in on a printed form */
+.line-field {
+  margin-top: 0.25rem;
+  width: 100%;
+  border: 0;
+  border-bottom: 2px solid var(--color-line);
+  background: transparent;
+  padding: 0.5rem 0.1rem;
+  font-size: 16px;
+  color: var(--color-ink);
+}
+.line-field:focus {
+  border-bottom-color: var(--color-carbon);
+  outline: none;
+}
+.line-field:focus-visible {
+  outline: 3px solid var(--color-carbon);
+  outline-offset: 2px;
 }

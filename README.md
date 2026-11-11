@@ -74,15 +74,18 @@ with your documents on every device you sign in on.
   everything and the guest account. A link ending in `?demo` puts the demo button at the top of the sign-in screen.
 
 ## Design
-The look comes from the carbon-copy duplicate books used at shop counters: a pale carbon-paper blue page,
-**yellow quote slips** and **pink invoice slips** with a perforated top edge, a red pre-printed number in a
-typewriter font, and rubber stamps for the status. Dark mode is the same book under a desk lamp at night.
-The quote or invoice itself is always white paper with one carbon-blue line, because that's what the client gets.
+The look is a bookkeeper's desk with stationery on it: **cream desk paper and navy ink**, headings in a serif like a
+printed letterhead, **yellow quote slips** and **pink invoice slips** with a perforated top edge, a red pre-printed
+number in a typewriter font, and rubber stamps for the status. Dark mode is the same desk at night, in dark walnut.
+The quote or invoice itself is always white paper with one navy line, because that's what the client gets.
 
-On a laptop, the blue side of the sign-in screen shows three example cards with made-up details, so people see
-what PaperTrail does before they sign up: a quote the client accepted, the tax invoice made from it with 15% VAT
-and a part payment, and the WhatsApp reminder for what's still owed. The cards never overlap, and they follow the
-English/Afrikaans switch and dark mode.
+**The sign-in page is a tax invoice on the desk** (`components/LoginScreen.tsx`): what you get is listed as the
+invoice's lines, all R 0,00, with a green FREE stamp, and the sign-in form is filled in like a printed form, on lines.
+**Try the demo** is a yellow quote slip numbered "DEMO".
+
+**On a laptop the pages are in a sidebar**, like accounting software: the pages with icons, New quote and New invoice
+at the top, and the saving status, language, theme and your account at the bottom (`components/Header.tsx`). On a
+phone there's a slim bar at the top and the navigation bar at the bottom, with a big + for new documents.
 
 The first screen after signing up shows three real PaperTrail documents with made-up details, overlapping like
 pages on a desk (`components/SampleDocuments.tsx`). Each shows something the app does: a quote the client
@@ -90,8 +93,8 @@ accepted, the tax invoice made from it with a part payment, and an invoice in Af
 They use the same `DocumentSheet` as the app, so new users see exactly what they're about to make. Phones skip
 them so the buttons stay near the top.
 
-Fonts: [Familjen Grotesk](https://fonts.google.com/specimen/Familjen+Grotesk) for everything, and
-[Courier Prime](https://fonts.google.com/specimen/Courier+Prime) only for the slip numbers.
+Fonts: [IBM Plex Sans](https://fonts.google.com/specimen/IBM+Plex+Sans) for everything, [Fraunces](https://fonts.google.com/specimen/Fraunces)
+for the big headings, and [Courier Prime](https://fonts.google.com/specimen/Courier+Prime) only for the slip numbers.
 
 ## Tech stack
 Next.js (App Router), React, TypeScript, Tailwind CSS v4, Firebase Authentication and Cloud Firestore,

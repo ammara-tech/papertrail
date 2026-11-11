@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Courier_Prime, Familjen_Grotesk } from "next/font/google";
+import { Courier_Prime, Fraunces, IBM_Plex_Sans } from "next/font/google";
 import AppShell from "@/components/AppShell";
 import "./globals.css";
 
-const familjen = Familjen_Grotesk({ subsets: ["latin"], variable: "--font-familjen", display: "swap" });
+const plex = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-plex", display: "swap" });
+const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces", display: "swap" });
 const courier = Courier_Prime({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-courier", display: "swap" });
 
 export const metadata: Metadata = {
@@ -14,8 +15,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#eef2f9" },
-    { media: "(prefers-color-scheme: dark)", color: "#0e1628" },
+    { media: "(prefers-color-scheme: light)", color: "#f3eee3" },
+    { media: "(prefers-color-scheme: dark)", color: "#16130e" },
   ],
 };
 
@@ -24,7 +25,7 @@ const themeScript = `try{var t=localStorage.getItem("papertrail:theme");if(t!=="
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-ZA" className={`${familjen.variable} ${courier.variable}`} suppressHydrationWarning>
+    <html lang="en-ZA" className={`${plex.variable} ${fraunces.variable} ${courier.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>

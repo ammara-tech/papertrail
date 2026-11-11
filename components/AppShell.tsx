@@ -69,11 +69,14 @@ function Gate({ children }: { children: React.ReactNode }) {
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-sheet focus:px-4 focus:py-2 focus:text-carbon">
         {t("app.skip")}
       </a>
-      {demo && <DemoBanner />}
       <Header email={auth.user.email ?? ""} />
-      <main id="main" className="mx-auto max-w-6xl px-4 pb-28 pt-8 sm:px-6 lg:pb-20 print:p-0">
-        {children}
-      </main>
+      {/* On a laptop everything sits to the right of the sidebar */}
+      <div className="lg:pl-64 print:pl-0">
+        {demo && <DemoBanner />}
+        <main id="main" className="mx-auto max-w-6xl px-4 pb-28 pt-8 sm:px-6 lg:px-10 lg:pb-20 print:p-0">
+          {children}
+        </main>
+      </div>
       <PhoneNav />
       <Shortcuts />
     </>
